@@ -10,6 +10,7 @@ import logging
 from config import *
 from keyboards import *
 import texts
+from db import *
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token= API)

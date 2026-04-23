@@ -6,32 +6,46 @@ connection = sqlite3.connect("database.db")
 cursor = connection.cursor()
 
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS Users (
-id INTEGER PRIMARY KEY,
-username TEXT NOT NULL,
-email TEXT NOT NULL,
-age INTEGER
-)  
+CREATE TABLE IF NOT EXISTS users (
+id INT
+username TEXT
+first_name TEXT
+block INT
+);
 ''')
 
-cursor.execute("CREATE INDEX IF NOT EXISTS idx_email ON Users (email)")
+def add_user(user_id,username,first_name):
+    check_user = cursor.execute("SELECT * FROM users WHERE id = ?",(user_id,))
+    if check_user.fetchone() is  None:
+        cursor.execute(f'''INSERT INTO users VALUES('{user_id}','{username}','{first_name}',0)''')
+        connection.commit()
 
-#cursor.execute("INSERT INTO Users (username,email,age) VALUES (?,?,?)", ("username", "ex@gmail.com","28"))
-#for i in range(30):
- #   cursor.execute("INSERT INTO Users (username,email,age) VALUES (?,?,?)", (f"username{i}", f"{i}ex@gmail.com",str(random.randint(28,60))))
-#cursor.execute("UPDATE Users SET age = ? WHERE username = ?",(29,"newuser"))
-#cursor.execute("DELETE FROM Users WHERE username = ?", ("newuser",))
 
-cursor.execute("SELECT SUM(age) FROM Users ")
-total1 = cursor.fetchone()[0]
-cursor.execute("SELECT COUNT (*) FROM Users")
-total2 = cursor.fetchone()[0]
+def show_users():
+    users_list = cursor.execute("SELECT * FROM users")
+    message = ""
+    for user in users_list:
+        message += f"{user[0]} @ {user[1]}\n {user[2]}\n"
+    connection.commit()
+    return message
 
-print(total1, total1/total2)
-cursor.execute("SELECT MIN(age) FROM Users")
-avg_age = cursor.fetchone()[0]
-print(avg_age)
+def show_stat():
+    count_users = cursor.execute("SELECT COUNT(*) FROM users").fetchone()
+    connection.commit()
+    return count_users[0]
 
+def add_to_block(input_id):
+    cursor.execute(f"UPDATE users SET block=? WHERE id=?",(1,input_id))
+    connection.commit()
+
+def remove_to_block(input_id):
+    cursor.execute(f"UPDATE users SET block=? WHERE id=?",(0,input_id))
+    connection.commit()
+
+def check_blok(user_id):
+    users = cursor.execute(f"SELECT block FROM users WHERE id = {user_id}").fetchone()
+    connection.commit()
+    return users[0]
 
 
 connection.commit()
